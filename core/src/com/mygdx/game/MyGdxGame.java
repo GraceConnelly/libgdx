@@ -4,118 +4,83 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import sun.jvm.hotspot.memory.Space;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import sun.jvm.hotspot.utilities.HeapGXLWriter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.StrictMath.abs;
+import static java.lang.StrictMath.floor;
+import static java.lang.StrictMath.floorDiv;
 
 public class MyGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
-	Texture img;
-	TextureRegion down, up, stand, right, left;
-
-	float x, y, xv, yv;
-
-	static final float MAX_VELOCITY = 100;
-	static final float SPACE_VELOCITY = 800;
-
+//	TextureRegion img, down, up, stand, right;
+//	Animation walkLR;
+//	public enum Direction {UP, DOWN, LEFT, RIGHT}
+//	Direction direction;
+//	float x, y, xv, yv;
+	List<Person> people = new ArrayList<Person>();
+	float time;
 	static final int WIDTH = 18;
 	static final int HEIGHT = 26;
 
-	static final int DRAW_WIDTH = WIDTH*3;
-	static final int DRAW_HEIGHT = HEIGHT*3;
+	static final int DRAW_WIDTH = WIDTH * 3;
+	static final int DRAW_HEIGHT = HEIGHT * 3;
+//	d
+//	static int randX (){
+//		Math.random()
+//	}
 
 	@Override
-	public void create () {
+	public void create() {
+//		float w = Gdx.graphics.getWidth();
+//		float h = Gdx.graphics.getHeight();
+//
+//		camera = new OrthographicCamera();
+//		camera.setToOrtho(false,w,h);
+//		camera.update();
+//		tiledMap = new TmxMapLoader().load("MyCrappyMap.tmx");
+//		tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+//		Gdx.input.setInputProcessor(this);
 		batch = new SpriteBatch();
 		Texture tiles = new Texture("tiles.png");
 		TextureRegion[][] grid = TextureRegion.split(tiles, 16, 16);
-		down = grid[6][0];
-		up = grid[6][1];
-		stand = grid[6][2];
-		right = grid[6][3];
-		left = new TextureRegion(right);
-		left.flip(true, false);
-
+		//Make Player
+		people.add(new Person(grid[6][0], grid[6][1], grid[6][2], grid[6][3], new Animation(0.2f, grid[6][3], grid[6][2]), 0 , 0, 100));
+		//people.add(new Zombie(grid[6][4],grid[6][5], grid[6][6], grid[6][7], new Animation(0.2f, grid[6][7],grid[6][6]), 80, 80, 100));
 	}
 
 	@Override
-	public void render () {
-		Gdx.gl.glClearColor(255/255f, 160/255f, 122/255f, 1);
+	public void render() {
+		time += Gdx.graphics.getDeltaTime();
+		Person.move(people);
+		Person.defineImgDirection(people);
+
+		Gdx.gl.glClearColor(255 / 255f, 160 / 255f, 122 / 255f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		batch.draw(stand, x, y , DRAW_WIDTH, DRAW_HEIGHT);
-		batch.end();
-		//time += Gdx.graphics.getDeltaTime();
-		move();
-
-		TextureRegion img;
-		if (xv != 0) {
-			img = xv > 0 ? right : left;
+		for (Person p : people) {
+			if (p.direction == Person.Direction.LEFT) {
+				batch.draw(p.getImg(), p.getX() + DRAW_WIDTH, p.getY(), DRAW_WIDTH * -1, DRAW_HEIGHT);
+			} else {
+				batch.draw(p.getImg(), p.getX(), p.getY(), DRAW_WIDTH, DRAW_HEIGHT);
+			}
+			batch.end();
 		}
-		else if (yv != 0) {
-			img = yv >0 ? up : down;
-		}
-		else {
-			img = stand;
-		}
-
-		//Gdx.gl.glClearColor(0.5f, 0.5f, 1, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-			batch.draw(img, x, y, DRAW_WIDTH, DRAW_HEIGHT);
-		batch.end();
 	}
 	
 	@Override
 	public void dispose () {
 		batch.dispose();
-		img.dispose();
 	}
-
-	float decelerate(float velocity) {
-		float deceleration = 0.95f; // the closer to 1, the slower the deceleration
-		velocity *= deceleration;
-		if (Math.abs(velocity) < 1) {
-			velocity = 0;
-		}
-		return velocity;
-	}
-
-	void move() {
-		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			yv = MAX_VELOCITY;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			yv = MAX_VELOCITY * -1;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			xv = MAX_VELOCITY;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			xv = MAX_VELOCITY * -1;
-
-		}
-		y += yv * Gdx.graphics.getDeltaTime();
-		x += xv * Gdx.graphics.getDeltaTime();
-
-		yv = decelerate(yv);
-		xv = decelerate(xv);
-
-		if (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-			yv = SPACE_VELOCITY;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-			yv = SPACE_VELOCITY * -1;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-			xv = SPACE_VELOCITY;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-			xv = SPACE_VELOCITY * -1;
-
-		}
-	}
-
 }
