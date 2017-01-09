@@ -56,8 +56,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		Texture tiles = new Texture("tiles.png");
 		TextureRegion[][] grid = TextureRegion.split(tiles, 16, 16);
 		//Make Player
-		people.add(new Person(grid[6][0], grid[6][1], grid[6][2], grid[6][3], new Animation(0.2f, grid[6][3], grid[6][2]), 0 , 0, 100));
-		//people.add(new Zombie(grid[6][4],grid[6][5], grid[6][6], grid[6][7], new Animation(0.2f, grid[6][7],grid[6][6]), 80, 80, 100));
+		people.add(new Player(grid[6][0], grid[6][1], grid[6][2], grid[6][3], new Animation(0.2f, grid[6][3], grid[6][2]), 0 , 0, 100));
+		people.add(new Zombie(grid[6][4],grid[6][5], grid[6][6], grid[6][7], new Animation(0.2f, grid[6][7],grid[6][6]), 80, 80, 100));
 	}
 
 	@Override
