@@ -146,21 +146,7 @@ public class Person {
                 p.setXv(MAX_VELOCITY * -1);
                 p.setDirection(Direction.LEFT);
             }
-            if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                float accelerationFactor = 1.5f;
-                if (p.getYv() < 0) {
-                    p.setYv(-MAX_VELOCITY * accelerationFactor);
-                } else if (p.getYv() > 0) {
-                    p.setYv(MAX_VELOCITY * accelerationFactor);
-                }
-
-                if (p.getXv() < 0) {
-                    p.setXv(-MAX_VELOCITY * accelerationFactor);
-                } else if (p.getXv() > 0 ) {
-                    p.setXv(MAX_VELOCITY * accelerationFactor);
-                }
-            }
-            checkBounds(p);
+            moveCharacter(p);
             p.setYv(decelerate(p.getYv()));
             p.setXv(decelerate(p.getXv()));
         }
@@ -175,28 +161,24 @@ public class Person {
         return velocity;
     }
 
-    static void checkBounds(Person p){
-
+    static void moveCharacter(Person p){
         float windowY = (float)Gdx.graphics.getHeight();
         float windowX = (float)Gdx.graphics.getWidth();
-        //float imgY = (float)p.getUp().getRegionHeight();
-        //float imgX = (float)p.getRight().getRegionWidth();
+        float acclFctr = (Gdx.input.isKeyPressed(Input.Keys.SPACE)) ? 3.5f : 1.0f;
 
         if (p.getY() < 0) {
             p.setY(windowY /*- imgY*/);
         } else if ((p.getY() /*+ imgY*/) > windowY) {
             p.setY(0);
         } else {
-            p.setY( p.getY() + (p.getYv() * Gdx.graphics.getDeltaTime()));
-            System.out.println(p.getY());
+            p.setY( p.getY() + (p.getYv()* acclFctr * Gdx.graphics.getDeltaTime()));
         }
         if (p.getX() < 0) {
             p.setX(windowX /*- imgX*/);
         } else if ((p.getX() /*+ imgX*/) > windowX) {
             p.setX(0);
         } else {
-            p.setX(p.getX() + (p.getXv() * Gdx.graphics.getDeltaTime()));
-            System.out.println(p.getX());
+            p.setX(p.getX() + (p.getXv() * acclFctr * Gdx.graphics.getDeltaTime()));
         }
     }
     static void defineImgDirection(List<Person> people){

@@ -75,8 +75,8 @@ public class MyGdxGame extends ApplicationAdapter {
 			} else {
 				batch.draw(p.getImg(), p.getX(), p.getY(), DRAW_WIDTH, DRAW_HEIGHT);
 			}
-			batch.end();
 		}
+		batch.end();
 	}
 	
 	@Override
